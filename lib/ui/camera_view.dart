@@ -9,7 +9,8 @@ import 'package:pytorch_lite/pytorch_lite.dart';
 import 'camera_view_singleton.dart';
 
 class CameraView extends StatefulWidget {
-  final Function(String classification, Duration inferenceTime)
+  final Function(
+          String classification, String probability, Duration inferenceTime)
       resultsCallbackClassification;
 
   /// Constructor
@@ -25,6 +26,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   /// Controller
   CameraController? cameraController;
+  String label = "";
+  String probability = "";
 
   /// true when inference is ongoing
   bool predicting = false;
@@ -43,11 +46,11 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
 
   //load your model
   Future loadModel() async {
-    String pathImageModel = "assets/models/efficientnet_scripted.pt";
+    String pathImageModel = "assets/models/mobilevit_xxs_torchscript.pt";
     try {
       _imageModel = await PytorchLite.loadClassificationModel(
-          pathImageModel, 224, 224, 1000,
-          labelPath: "assets/labels/label_classification_imageNet.txt");
+          pathImageModel, 224, 224, 16,
+          labelPath: "assets/labels/labels.txt");
     } catch (e) {
       if (e is PlatformException) {
         print("only supported for android, Error is $e");
@@ -165,13 +168,16 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       // Start the stopwatch
       Stopwatch stopwatch = Stopwatch()..start();
 
-      String imageClassification = await _imageModel!
-          .getCameraImagePrediction(cameraImage, _camFrameRotation);
+      Map<String, dynamic> result = await _imageModel!
+          .getCameraImagePredictionAndProbabilities(
+              cameraImage, _camFrameRotation);
       // Stop the stopwatch
       stopwatch.stop();
+      label = result['label'];
+      probability = result['probability'];
       // print("imageClassification $imageClassification");
       widget.resultsCallbackClassification(
-          imageClassification, stopwatch.elapsed);
+          label, probability, stopwatch.elapsed);
     }
     if (!mounted) {
       return;

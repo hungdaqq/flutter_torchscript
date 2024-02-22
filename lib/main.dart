@@ -55,36 +55,30 @@ class _BottomNavigationBarExampleState
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          centerTitle: true,
-          toolbarHeight: 39,
-          // title: Image.asset('assets/images/tfl_logo.png'),
-          title: const Text(
-            "Phân loại hành vi tài xế ô tô",
-            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red),
-          ),
+      appBar: AppBar(
+        backgroundColor: Colors.white38,
+        centerTitle: true,
+        toolbarHeight: 36,
+        // title: Image.asset('assets/images/tfl_logo.png'),
+        title: const Text(
+          "ĐATN PHÂN LOẠI HÀNH VI TÀI XẾ",
+          style: TextStyle(
+              fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
         ),
-        body: Center(
-          child: _widgetOptions?.elementAt(_selectedIndex),
-        ),
-        bottomNavigationBar: SizedBox(
-          height: 60,
-          child: BottomNavigationBar(
-            items: const <BottomNavigationBarItem>[
-              BottomNavigationBarItem(
-                icon: Icon(Icons.image),
-                label: 'Gallery',
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.camera),
-                label: 'Livecam',
-              ),
-            ],
-            currentIndex: _selectedIndex,
-            selectedItemColor: Colors.red,
-            onTap: _onItemTapped,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.image),
+            onPressed: () => _onItemTapped(0),
           ),
-        ));
+          IconButton(
+            icon: const Icon(Icons.camera),
+            onPressed: () => _onItemTapped(1),
+          ),
+        ],
+      ),
+      body: Center(
+        child: _widgetOptions?.elementAt(_selectedIndex),
+      ),
+    );
   }
 }

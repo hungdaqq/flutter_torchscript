@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pytorch_lite/pytorch_lite.dart';
 
 import 'ui/camera_view.dart';
 
@@ -11,8 +10,9 @@ class RunModelByCameraDemo extends StatefulWidget {
 }
 
 class _RunModelByCameraDemoState extends State<RunModelByCameraDemo> {
-
   String? classification;
+  String? probability;
+
   Duration? classificationInferenceTime;
 
   /// Scaffold Key
@@ -22,20 +22,26 @@ class _RunModelByCameraDemoState extends State<RunModelByCameraDemo> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: scaffoldKey,
-      backgroundColor: Colors.black,
+      backgroundColor: Colors.white,
       body: Stack(
         children: <Widget>[
-          // Camera View
-          CameraView(resultsCallbackClassification),
-          Align(
-            alignment: Alignment.bottomCenter,
+          Container(
+            alignment: Alignment.topLeft,
+            padding: const EdgeInsets.all(5),
+            height: MediaQuery.of(context).size.height,
+            width: MediaQuery.of(context).size.width,
+            child: CameraView(resultsCallbackClassification),
+          ), // Camera View
+          Positioned(
+            bottom: 0,
+            right: 0,
             child: Column(
               children: [
-                if (classification != null)
-                  StatsRow('Classification:', '$classification'),
+                if (classification != null) Text('$classification'),
+                if (probability != null) Text('$probability'),
                 if (classificationInferenceTime != null)
-                  StatsRow('Classification Inference time:',
-                      '${classificationInferenceTime?.inMilliseconds} ms'),
+                  Text(
+                      'Thời gian xử lý: ${classificationInferenceTime?.inMilliseconds} ms')
               ],
             ),
           )
@@ -45,39 +51,14 @@ class _RunModelByCameraDemoState extends State<RunModelByCameraDemo> {
   }
 
   void resultsCallbackClassification(
-      String classification, Duration inferenceTime) {
+      String classification, String probability, Duration inferenceTime) {
     if (!mounted) {
       return;
     }
     setState(() {
       this.classification = classification;
+      this.probability = probability;
       classificationInferenceTime = inferenceTime;
     });
-  }
-}
-
-/// Row for one Stats field
-class StatsRow extends StatelessWidget {
-  final String title;
-  final String value;
-
-  const StatsRow(this.title, this.value, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Column(
-        // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            title,
-            style: const TextStyle(
-                fontWeight: FontWeight.bold, color: Colors.green),
-          ),
-          Text(value)
-        ],
-      ),
-    );
   }
 }

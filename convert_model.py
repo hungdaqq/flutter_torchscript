@@ -1,18 +1,23 @@
 import torch
+import timm
 import torch.nn as nn
 from torchvision import transforms, models
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 num_classes = 16
 
-# Instantiate your PyTorch model
+import torch
+from torch.utils.mobile_optimizer import optimize_for_mobile
+
+
 model = models.efficientnet_b0(pretrained=True)
 model.classifier[1] = nn.Linear(in_features=model.classifier[1].in_features, out_features=num_classes, bias=True)
 
-# Example input
-example_input = torch.rand(1, 3, 224, 224)  # Adjust the shape according to your input
+pretrained = 'pretrained/mymodel_0.8633.pt'
 
-# Trace the model
-traced_model = torch.jit.trace(model, example_input)
-
-# Save the traced model to a file
-traced_model.save("traced_model.pt")
+model.load_state_dict(torch.load(pretrained, map_location=device),strict=False)
+model.eval()
+example = torch.rand(1, 3, 224, 224)
+traced_script_module = torch.jit.script(model, example)
+optimized_traced_model = optimize_for_mobile(traced_script_module)
+optimized_traced_model._save_for_lite_interpreter("assets/models/mobilevit_xxs_torchscript.pt")
